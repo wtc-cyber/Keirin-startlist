@@ -1,0 +1,3644 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Keirin Startlist Generator</title>
+
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#111827;
+  --panel2:#162033;
+  --line:#29364a;
+  --text:#edf2f7;
+  --muted:#9aa8bb;
+  --blue:#4f8cff;
+  --green:#27c878;
+  --yellow:#e8bd3e;
+  --red:#ef5b62;
+  --orange:#ff9f43;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:
+    Arial,
+    "Noto Sans TC",
+    "Microsoft JhengHei",
+    sans-serif;
+}
+
+header{
+  background:#0d1424;
+  border-bottom:1px solid var(--line);
+  padding:20px 24px;
+}
+
+header h1{
+  margin:0;
+  font-size:24px;
+}
+
+header p{
+  margin:6px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.container{
+  max-width:1600px;
+  margin:auto;
+  padding:20px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:390px 1fr;
+  gap:18px;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.panel h2{
+  margin:0 0 14px;
+  font-size:17px;
+}
+
+.panel h3{
+  margin:15px 0 8px;
+  font-size:14px;
+}
+
+label{
+  display:block;
+  margin:12px 0 6px;
+  color:#c7d1df;
+  font-size:13px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  border:1px solid var(--line);
+  background:#0a1220;
+  color:var(--text);
+  border-radius:7px;
+  padding:10px;
+  font-size:14px;
+}
+
+textarea{
+  min-height:250px;
+  resize:vertical;
+  font-family:Consolas,monospace;
+  line-height:1.5;
+}
+
+button{
+  border:0;
+  border-radius:7px;
+  padding:9px 13px;
+  cursor:pointer;
+  background:var(--blue);
+  color:white;
+  font-weight:bold;
+}
+
+button:hover{
+  filter:brightness(1.1);
+}
+
+button.secondary{
+  background:#29364c;
+}
+
+button.success{
+  background:#16864b;
+}
+
+button.warning{
+  background:#8d6b12;
+}
+
+button.danger{
+  background:#9e3038;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.btnrow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.status{
+  border:1px solid var(--line);
+  background:#0b1424;
+  border-radius:8px;
+  padding:12px;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.status.ok{
+  border-color:#176f44;
+}
+
+.status.warn{
+  border-color:#816711;
+}
+
+.status.error{
+  border-color:#8d3038;
+}
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.stat{
+  background:#0a1220;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px;
+}
+
+.stat .value{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.stat .label{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+.badge{
+  display:inline-block;
+  border-radius:999px;
+  padding:2px 7px;
+  font-size:10px;
+  font-weight:bold;
+  margin-left:4px;
+}
+
+.badge.rank{
+  background:#173a70;
+  color:#b9d5ff;
+}
+
+.badge.nr{
+  background:#554317;
+  color:#ffe58c;
+}
+
+.badge.conflict{
+  background:#64262c;
+  color:#ffb7bb;
+}
+
+.badge.good{
+  background:#124c31;
+  color:#9effc6;
+}
+
+.heat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+  gap:14px;
+}
+
+.heat{
+  border:1px solid var(--line);
+  background:#0c1524;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.heat-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:11px 13px;
+  background:#152239;
+  font-weight:bold;
+}
+
+.heat-header small{
+  color:var(--muted);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  border-bottom:1px solid var(--line);
+  padding:8px;
+  font-size:13px;
+  text-align:left;
+}
+
+th{
+  background:#121c2d;
+  color:#aebbd0;
+}
+
+.position{
+  width:45px;
+  text-align:center;
+  color:#8392a8;
+}
+
+.rank-col{
+  width:70px;
+  text-align:center;
+}
+
+.team{
+  color:#b8c5d7;
+}
+
+.nr{
+  color:#ffdc6d;
+  font-weight:bold;
+}
+
+.conflict-row{
+  background:#3a1b20;
+}
+
+.suggestion{
+  border:1px solid var(--line);
+  background:#0d1626;
+  border-radius:9px;
+  padding:13px;
+  margin-bottom:10px;
+}
+
+.suggestion.hard{
+  border-color:#85353c;
+}
+
+.suggestion.soft{
+  border-color:#735d20;
+}
+
+.suggestion-title{
+  font-weight:bold;
+  margin-bottom:7px;
+}
+
+.suggestion-detail{
+  font-size:12px;
+  color:#bdc9da;
+  line-height:1.6;
+}
+
+.swap-box{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  align-items:end;
+}
+
+.team-table{
+  max-height:400px;
+  overflow:auto;
+}
+
+.team-good{
+  color:#8dffb8;
+}
+
+.team-warning{
+  color:#ffd86b;
+}
+
+.team-error{
+  color:#ff9fa5;
+}
+
+.review-item{
+  border-bottom:1px solid var(--line);
+  padding:7px 0;
+  font-size:13px;
+}
+
+.locked{
+  color:#ff9da3;
+}
+
+.unlocked{
+  color:#91ffb8;
+}
+
+code{
+  color:#9fc2ff;
+}
+
+.hidden{
+  display:none;
+}
+
+@media(max-width:1050px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:600px){
+  .stat-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .swap-box{
+    grid-template-columns:1fr;
+  }
+}
+
+@media print{
+
+  body{
+    background:white;
+    color:black;
+  }
+
+  header{
+    background:white;
+    color:black;
+    border-bottom:2px solid black;
+  }
+
+  .no-print{
+    display:none!important;
+  }
+
+  .panel{
+    border:0;
+    padding:0;
+  }
+
+  .heat{
+    border:1px solid #555;
+    break-inside:avoid;
+  }
+
+  th{
+    background:#eee;
+    color:black;
+  }
+
+  td,
+  th{
+    color:black;
+    border-color:#aaa;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🚴 Keirin Startlist Generator</h1>
+  <p>
+    UCI-style seeding · Balanced heats · Team distribution analysis · Commissaire control
+  </p>
+</header>
+
+<div class="container">
+
+<div class="layout">
+
+<!-- =====================================================
+     LEFT CONTROL PANEL
+===================================================== -->
+
+<div class="no-print">
+
+  <!-- FORMAT -->
+  <div class="panel">
+
+    <h2>① Competition Format</h2>
+
+    <label>Format Profile</label>
+
+    <select id="formatProfile">
+
+      <option value="world">
+        UCI World Championship Style
+      </option>
+
+      <option value="olympic">
+        UCI Olympic Style
+      </option>
+
+      <option value="adaptive" selected>
+        Adaptive UCI-style
+      </option>
+
+    </select>
+
+    <div style="height:12px"></div>
+
+    <div class="stat-grid">
+
+      <div class="stat">
+        <div class="value" id="riderCount">0</div>
+        <div class="label">RIDERS</div>
+      </div>
+
+      <div class="stat">
+        <div class="value" id="heatCount">-</div>
+        <div class="label">HEATS</div>
+      </div>
+
+      <div class="stat">
+        <div class="value" id="heatSizes">-</div>
+        <div class="label">SIZES</div>
+      </div>
+
+    </div>
+
+    <div class="status warn" style="margin-top:12px">
+
+      <b>Format principle</b><br>
+
+      先按選定 UCI-style profile 決定組數，
+      再按照實際參賽人數平均分組。
+
+      <br><br>
+
+      例如：
+
+      <br>
+      15 riders → 5 / 5 / 5
+      <br>
+      16 riders → 6 / 5 / 5
+      <br>
+      17 riders → 6 / 6 / 5
+      <br>
+      28 riders → 7 / 7 / 7 / 7
+
+    </div>
+
+  </div>
+
+
+  <!-- INPUT -->
+  <div class="panel">
+
+    <h2>② Rider Input</h2>
+
+    <div style="font-size:12px;color:#9ca9bc;line-height:1.7">
+
+      每行一名車手：
+
+      <br>
+
+      <code>姓名,隊伍,世界排名</code>
+
+      <br><br>
+
+      例如：
+
+      <br>
+
+      <code>Chan Tai Man,HKG,1</code>
+
+      <br>
+
+      <code>Lee Wai Ming,HKG,</code>
+
+      <br><br>
+
+      世界排名不詳 → 留空 → NR
+
+    </div>
+
+    <textarea
+      id="inputData"
+      placeholder="Chan Tai Man,HKG,1
+Lee Wai Ming,HKG,2
+Zhang San,CHN,3
+Tanaka Taro,JPN,4
+Kim Min Soo,KOR,5"></textarea>
+
+    <div class="btnrow">
+
+      <button onclick="loadRiders()">
+        Load Riders
+      </button>
+
+      <button
+        class="secondary"
+        onclick="loadDemo(15)">
+        Demo 15
+      </button>
+
+      <button
+        class="secondary"
+        onclick="loadDemo(28)">
+        Demo 28
+      </button>
+
+      <button
+        class="secondary"
+        onclick="loadDemo(72)">
+        Demo 72
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- GENERATE -->
+  <div class="panel">
+
+    <h2>③ Generate Startlist</h2>
+
+    <div class="btnrow">
+
+      <button onclick="generateStartlist()">
+        Generate Startlist
+      </button>
+
+    </div>
+
+    <div class="btnrow">
+
+      <button
+        id="lockButton"
+        class="success"
+        onclick="toggleLock()">
+        🔓 Lock Startlist
+      </button>
+
+      <button
+        class="secondary"
+        onclick="exportJSON()">
+        Export JSON
+      </button>
+
+      <button
+        class="secondary"
+        onclick="document.getElementById('jsonFile').click()">
+        Import JSON
+      </button>
+
+      <input
+        id="jsonFile"
+        type="file"
+        accept=".json"
+        class="hidden"
+        onchange="importJSON(event)">
+
+      <button
+        class="secondary"
+        onclick="window.print()">
+        Print / PDF
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- MANUAL SWAP -->
+  <div class="panel">
+
+    <h2>④ Manual Adjustment</h2>
+
+    <p style="font-size:12px;color:#9ca9bc">
+      用 Swap 而不是單純 Move，
+      確保每組人數永遠保持平衡。
+    </p>
+
+    <div class="swap-box">
+
+      <div>
+
+        <label>Rider A</label>
+
+        <select id="swapA"></select>
+
+      </div>
+
+      <div>
+
+        <label>Rider B</label>
+
+        <select id="swapB"></select>
+
+      </div>
+
+    </div>
+
+    <div class="btnrow">
+
+      <button
+        class="secondary"
+        onclick="manualSwap()">
+        Swap Riders
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- REVIEW -->
+  <div class="panel">
+
+    <h2>⑤ Commissaire Review</h2>
+
+    <div id="reviewBox">
+      尚未產生 Startlist。
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     RIGHT
+===================================================== -->
+
+<div>
+
+  <!-- STARTLIST -->
+  <div class="panel">
+
+    <h2>Startlist</h2>
+
+    <div
+      id="mainStatus"
+      class="status">
+      尚未產生 Startlist。
+    </div>
+
+    <div
+      id="heatContainer"
+      class="heat-grid"
+      style="margin-top:14px">
+
+      <div style="color:#8f9db2">
+        Load riders → Generate Startlist
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- TEAM ANALYSIS -->
+  <div class="panel no-print">
+
+    <h2>
+      Team Distribution Analysis
+    </h2>
+
+    <div
+      id="teamSummary"
+      class="status">
+
+      尚未產生分析。
+
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div
+      id="teamSuggestions">
+
+      尚未產生建議。
+
+    </div>
+
+  </div>
+
+
+  <!-- RIDER DATA -->
+  <div class="panel no-print">
+
+    <h2>Rider Data</h2>
+
+    <div class="team-table">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Team</th>
+            <th>World Ranking</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="riderTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+</div>
+
+
+<script>
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let riders = [];
+let heats = [];
+let locked = false;
+
+
+/* =========================================================
+   FORMAT PROFILES
+
+   These are UCI-style adaptive profiles.
+   They are intentionally kept configurable rather than
+   claiming every threshold below is a literal UCI article.
+========================================================= */
+
+const FORMAT_PROFILES = {
+
+  world:{
+
+    name:"UCI World Championship Style",
+
+    getHeats(n){
+
+      if(n <= 14) return 2;
+      if(n <= 21) return 3;
+      if(n <= 28) return 4;
+      if(n <= 42) return 6;
+      if(n <= 56) return 8;
+      if(n <= 72) return 9;
+
+      return Math.ceil(n / 8);
+    }
+
+  },
+
+
+  olympic:{
+
+    name:"UCI Olympic Style",
+
+    getHeats(n){
+
+      if(n <= 12) return 2;
+      if(n <= 18) return 3;
+      if(n <= 24) return 4;
+      if(n <= 36) return 6;
+      if(n <= 48) return 8;
+      if(n <= 72) return 9;
+
+      return Math.ceil(n / 8);
+    }
+
+  },
+
+
+  adaptive:{
+
+    name:"Adaptive UCI-style",
+
+    getHeats(n){
+
+      /*
+        Target approximately 5–8 riders per heat.
+      */
+
+      if(n <= 10) return 2;
+      if(n <= 15) return 3;
+      if(n <= 21) return 3;
+      if(n <= 28) return 4;
+      if(n <= 35) return 5;
+      if(n <= 42) return 6;
+      if(n <= 48) return 6;
+      if(n <= 56) return 8;
+      if(n <= 64) return 8;
+      if(n <= 72) return 9;
+
+      return Math.ceil(n / 8);
+    }
+
+  }
+
+};
+
+
+/* =========================================================
+   BASIC UTILITIES
+========================================================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function parseRank(value){
+
+  const text =
+    String(value ?? "").trim();
+
+  if(!text){
+    return null;
+  }
+
+  const n = Number(text);
+
+  if(!Number.isFinite(n) || n <= 0){
+    return null;
+  }
+
+  return Math.floor(n);
+
+}
+
+
+/* =========================================================
+   HEAT CALCULATION
+========================================================= */
+
+function getHeatCount(){
+
+  if(riders.length < 2){
+    return 0;
+  }
+
+  const profile =
+    FORMAT_PROFILES[
+      document.getElementById(
+        "formatProfile"
+      ).value
+    ];
+
+  return profile.getHeats(
+    riders.length
+  );
+
+}
+
+
+function calculateHeatSizes(
+  total,
+  heatCount
+){
+
+  if(!heatCount){
+    return [];
+  }
+
+  const base =
+    Math.floor(
+      total / heatCount
+    );
+
+  const remainder =
+    total % heatCount;
+
+  const result = [];
+
+  for(
+    let i=0;
+    i<heatCount;
+    i++
+  ){
+
+    result.push(
+      base +
+      (
+        i < remainder
+        ? 1
+        : 0
+      )
+    );
+
+  }
+
+  return result;
+
+}
+
+
+/* =========================================================
+   SEEDING ORDER
+========================================================= */
+
+function getSeedingOrder(){
+
+  const ranked =
+    riders
+      .filter(
+        r => r.rank !== null
+      )
+      .sort(
+        (a,b)=>{
+
+          if(a.rank !== b.rank){
+            return a.rank - b.rank;
+          }
+
+          return a.name.localeCompare(
+            b.name,
+            "zh-Hant"
+          );
+
+        }
+      );
+
+
+  const unranked =
+    riders
+      .filter(
+        r => r.rank === null
+      )
+      .sort(
+        (a,b)=>
+          a.name.localeCompare(
+            b.name,
+            "zh-Hant"
+          )
+      );
+
+
+  /*
+    IMPORTANT:
+
+    Do NOT invent ranking numbers for NR riders.
+
+    Overall order:
+    ranked riders first
+    then NR riders.
+  */
+
+  return [
+    ...ranked,
+    ...unranked
+  ];
+
+}
+
+
+/* =========================================================
+   BALANCED SNAKE SEEDING
+========================================================= */
+
+function createHeats(){
+
+  const heatCount =
+    getHeatCount();
+
+  const sizes =
+    calculateHeatSizes(
+      riders.length,
+      heatCount
+    );
+
+  const order =
+    getSeedingOrder();
+
+
+  heats =
+    sizes.map(
+      (size,index)=>({
+
+        number:index+1,
+
+        targetSize:size,
+
+        riders:[]
+
+      })
+    );
+
+
+  /*
+    Snake pattern:
+
+    H1 → H2 → H3 → H4
+    H4 → H3 → H2 → H1
+    H1 → H2 → H3 → H4
+
+    The capacity of each heat is always respected.
+  */
+
+  let direction = 1;
+
+  let pointer = 0;
+
+
+  while(
+    pointer <
+    order.length
+  ){
+
+    const available =
+      heats.filter(
+        h =>
+          h.riders.length
+          <
+          h.targetSize
+      );
+
+
+    if(!available.length){
+      break;
+    }
+
+
+    const sequence =
+      direction === 1
+      ? available
+      : [...available].reverse();
+
+
+    for(
+      const heat
+      of sequence
+    ){
+
+      if(
+        pointer >=
+        order.length
+      ){
+        break;
+      }
+
+
+      if(
+        heat.riders.length
+        <
+        heat.targetSize
+      ){
+
+        heat.riders.push(
+          order[pointer]
+        );
+
+        pointer++;
+
+      }
+
+    }
+
+
+    direction *= -1;
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD RIDERS
+========================================================= */
+
+function loadRiders(){
+
+  if(locked){
+
+    alert(
+      "Startlist 已 Lock，請先 Unlock。"
+    );
+
+    return;
+  }
+
+
+  const input =
+    document.getElementById(
+      "inputData"
+    ).value.trim();
+
+
+  if(!input){
+
+    alert(
+      "請輸入車手資料。"
+    );
+
+    return;
+  }
+
+
+  const lines =
+    input
+      .split(/\r?\n/)
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+
+  const parsed = [];
+  const errors = [];
+
+  const nameSet =
+    new Set();
+
+
+  lines.forEach(
+    (line,index)=>{
+
+      const parts =
+        line.includes("\t")
+        ? line.split("\t")
+        : line.split(",");
+
+
+      const clean =
+        parts.map(
+          x=>x.trim()
+        );
+
+
+      if(clean.length < 2){
+
+        errors.push(
+          `第 ${index+1} 行格式錯誤`
+        );
+
+        return;
+      }
+
+
+      const name =
+        clean[0];
+
+      const team =
+        clean[1];
+
+      const rank =
+        parseRank(
+          clean[2]
+        );
+
+
+      if(!name){
+
+        errors.push(
+          `第 ${index+1} 行沒有姓名`
+        );
+
+        return;
+      }
+
+
+      if(!team){
+
+        errors.push(
+          `第 ${index+1} 行沒有隊伍`
+        );
+
+        return;
+      }
+
+
+      const key =
+        name.toLowerCase();
+
+
+      if(nameSet.has(key)){
+
+        errors.push(
+          `重複車手：${name}`
+        );
+
+      }
+
+
+      nameSet.add(key);
+
+
+      parsed.push({
+
+        id:
+          crypto.randomUUID
+          ? crypto.randomUUID()
+          :
+          "R-" +
+          Date.now() +
+          "-" +
+          index,
+
+        name,
+
+        team,
+
+        rank
+
+      });
+
+    }
+  );
+
+
+  riders =
+    parsed;
+
+  heats = [];
+
+
+  renderRiderTable();
+
+  updateStats();
+
+  renderHeats();
+
+  renderTeamAnalysis();
+
+  renderReview();
+
+
+  if(errors.length){
+
+    setMainStatus(
+      "error",
+      "<b>Input Warning</b><br>" +
+      errors.join("<br>")
+    );
+
+  }else{
+
+    setMainStatus(
+      "ok",
+      `${riders.length} riders loaded.`
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   GENERATE
+========================================================= */
+
+function generateStartlist(){
+
+  if(locked){
+
+    alert(
+      "Startlist 已 Lock，請先 Unlock。"
+    );
+
+    return;
+  }
+
+
+  if(riders.length < 2){
+
+    alert(
+      "至少需要 2 名車手。"
+    );
+
+    return;
+  }
+
+
+  createHeats();
+
+  renderHeats();
+
+  renderSwapSelectors();
+
+  renderTeamAnalysis();
+
+  renderReview();
+
+}
+
+
+/* =========================================================
+   TEAM ANALYSIS
+========================================================= */
+
+function analyseTeams(){
+
+  const teamMap =
+    new Map();
+
+
+  riders.forEach(
+    rider=>{
+
+      const team =
+        rider.team
+          .trim()
+          .toUpperCase();
+
+
+      if(!teamMap.has(team)){
+
+        teamMap.set(
+          team,
+          []
+        );
+
+      }
+
+
+      teamMap
+        .get(team)
+        .push(rider);
+
+    }
+  );
+
+
+  const analysis = [];
+
+
+  teamMap.forEach(
+    (team,riderList)=>{
+
+      const distribution =
+        heats.map(
+          heat =>
+
+            heat.riders.filter(
+              rider =>
+                rider.team
+                  .trim()
+                  .toUpperCase()
+                ===
+                team
+            ).length
+        );
+
+
+      const max =
+        Math.max(
+          ...distribution
+        );
+
+      const min =
+        Math.min(
+          ...distribution
+        );
+
+
+      const conflict =
+        max > 1;
+
+
+      analysis.push({
+
+        team,
+
+        riders:riderList,
+
+        distribution,
+
+        max,
+
+        min,
+
+        conflict
+
+      });
+
+    }
+  );
+
+
+  return analysis.sort(
+    (a,b)=>{
+
+      if(a.conflict !== b.conflict){
+        return a.conflict ? -1 : 1;
+      }
+
+      return a.team.localeCompare(
+        b.team
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TEAM SWAP SUGGESTION ENGINE
+========================================================= */
+
+function simulateSwap(
+  heatA,
+  indexA,
+  heatB,
+  indexB
+){
+
+  const a =
+    heatA.riders[indexA];
+
+  const b =
+    heatB.riders[indexB];
+
+
+  heatA.riders[indexA] = b;
+  heatB.riders[indexB] = a;
+
+
+  const result =
+    calculateTeamConflictCount();
+
+
+  heatA.riders[indexA] = a;
+  heatB.riders[indexB] = b;
+
+
+  return result;
+
+}
+
+
+function calculateTeamConflictCount(){
+
+  let total = 0;
+
+
+  heats.forEach(
+    heat=>{
+
+      const counts =
+        new Map();
+
+
+      heat.riders.forEach(
+        rider=>{
+
+          const team =
+            rider.team
+              .trim()
+              .toUpperCase();
+
+
+          counts.set(
+            team,
+            (counts.get(team) || 0)+1
+          );
+
+        }
+      );
+
+
+      counts.forEach(
+        count=>{
+
+          if(count > 1){
+
+            /*
+              2 riders same team = 1 conflict
+              3 riders same team = 2 conflicts
+            */
+
+            total +=
+              count - 1;
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  return total;
+
+}
+
+
+function rankingValue(rider){
+
+  return rider.rank === null
+    ? 999999
+    : rider.rank;
+
+}
+
+
+function rankingDistance(
+  a,
+  b
+){
+
+  return Math.abs(
+    rankingValue(a)
+    -
+    rankingValue(b)
+  );
+
+}
+
+
+/*
+  Measure how much a swap improves
+  the distribution of the two teams.
+
+  Lower spread is better.
+
+  Example:
+  Team A: 2,0,1
+  after:  1,1,1
+
+  improvement = positive
+*/
+
+function distributionSpread(
+  team
+){
+
+  if(!team){
+    return 0;
+  }
+
+  return (
+    Math.max(
+      ...team.distribution
+    )
+    -
+    Math.min(
+      ...team.distribution
+    )
+  );
+
+}
+
+
+function getSwapSuggestions(){
+
+  if(!heats.length){
+    return [];
+  }
+
+
+  const beforeConflicts =
+    calculateTeamConflictCount();
+
+
+  const analysis =
+    analyseTeams();
+
+
+  const suggestions = [];
+
+  const seen = new Set();
+
+
+  /*
+    Search ALL possible cross-heat swaps.
+
+    This means the system is not only looking
+    at the first obvious conflict.
+
+    It searches the complete startlist.
+  */
+
+  for(
+    let h1=0;
+    h1<heats.length;
+    h1++
+  ){
+
+    for(
+      let h2=h1+1;
+      h2<heats.length;
+      h2++
+    ){
+
+      const heatA =
+        heats[h1];
+
+      const heatB =
+        heats[h2];
+
+
+      for(
+        let i=0;
+        i<heatA.riders.length;
+        i++
+      ){
+
+        for(
+          let j=0;
+          j<heatB.riders.length;
+          j++
+        ){
+
+          const a =
+            heatA.riders[i];
+
+          const b =
+            heatB.riders[j];
+
+
+          const key =
+            [a.id,b.id]
+              .sort()
+              .join("|");
+
+
+          if(seen.has(key)){
+            continue;
+          }
+
+          seen.add(key);
+
+
+          /*
+            Same team swap has no value.
+          */
+
+          if(
+            a.team
+              .trim()
+              .toUpperCase()
+            ===
+            b.team
+              .trim()
+              .toUpperCase()
+          ){
+
+            continue;
+
+          }
+
+
+          const afterConflicts =
+            simulateSwap(
+              heatA,
+              i,
+              heatB,
+              j
+            );
+
+
+          const conflictImprovement =
+            beforeConflicts
+            -
+            afterConflicts;
+
+
+          /*
+            If there is no hard conflict,
+            still check distribution improvement.
+          */
+
+          const beforeDistribution =
+            calculateDistributionScore();
+
+
+          /*
+            Apply temporary swap.
+          */
+
+          heatA.riders[i] = b;
+          heatB.riders[j] = a;
+
+
+          const afterDistribution =
+            calculateDistributionScore();
+
+
+          /*
+            Restore.
+          */
+
+          heatA.riders[i] = a;
+          heatB.riders[j] = b;
+
+
+          const distributionImprovement =
+            beforeDistribution
+            -
+            afterDistribution;
+
+
+          if(
+            conflictImprovement <= 0 &&
+            distributionImprovement <= 0
+          ){
+
+            continue;
+
+          }
+
+
+          /*
+            Penalise very large ranking changes.
+
+            But resolving a hard team conflict
+            is much more important.
+          */
+
+          const rankCost =
+            rankingDistance(
+              a,
+              b
+            );
+
+
+          const score =
+            conflictImprovement * 100000
+            +
+            distributionImprovement * 1000
+            -
+            rankCost;
+
+
+          suggestions.push({
+
+            a,
+            b,
+
+            heatA:
+              heatA.number,
+
+            heatB:
+              heatB.number,
+
+            conflictImprovement,
+
+            distributionImprovement,
+
+            rankCost,
+
+            score,
+
+            type:
+              conflictImprovement > 0
+              ? "hard"
+              : "soft"
+
+          });
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  suggestions.sort(
+    (a,b)=>
+      b.score - a.score
+  );
+
+
+  /*
+    Remove near-duplicate suggestions
+    involving the same rider pair.
+  */
+
+  return suggestions.slice(
+    0,
+    8
+  );
+
+}
+
+
+/*
+  Overall team distribution score.
+
+  Lower is better.
+
+  A team with:
+    1 / 1 / 1
+  is better than:
+    2 / 1 / 0
+
+  This is a secondary optimisation only.
+*/
+
+function calculateDistributionScore(){
+
+  if(!heats.length){
+    return 0;
+  }
+
+
+  const analysis =
+    analyseTeams();
+
+
+  let score = 0;
+
+
+  analysis.forEach(
+    team=>{
+
+      const values =
+        team.distribution;
+
+
+      const max =
+        Math.max(
+          ...values
+        );
+
+      const min =
+        Math.min(
+          ...values
+        );
+
+
+      /*
+        Strong penalty for duplicates.
+      */
+
+      values.forEach(
+        count=>{
+
+          if(count > 1){
+
+            score +=
+              (count - 1) * 100;
+
+          }
+
+        }
+      );
+
+
+      /*
+        Secondary penalty for imbalance.
+      */
+
+      score +=
+        (max - min) * 5;
+
+    }
+  );
+
+
+  return score;
+
+}
+
+
+/* =========================================================
+   TEAM ANALYSIS RENDER
+========================================================= */
+
+function renderTeamAnalysis(){
+
+  const summary =
+    document.getElementById(
+      "teamSummary"
+    );
+
+  const suggestionsBox =
+    document.getElementById(
+      "teamSuggestions"
+    );
+
+
+  if(!heats.length){
+
+    summary.innerHTML =
+      "尚未產生分析。";
+
+    suggestionsBox.innerHTML =
+      "尚未產生建議。";
+
+    return;
+
+  }
+
+
+  const analysis =
+    analyseTeams();
+
+
+  const conflicts =
+    analysis.filter(
+      x=>x.conflict
+    );
+
+
+  const conflictCount =
+    calculateTeamConflictCount();
+
+
+  if(!conflicts.length){
+
+    summary.className =
+      "status ok";
+
+    summary.innerHTML =
+      `
+        <b>✓ No hard team conflict</b><br>
+        所有隊伍目前沒有兩名車手被安排在同一組。
+      `;
+
+  }else{
+
+    summary.className =
+      "status error";
+
+    summary.innerHTML =
+      `
+        <b>⚠ ${conflicts.length} team(s) have same-heat conflict</b><br>
+        Conflict count:
+        <b>${conflictCount}</b>
+      `;
+
+  }
+
+
+  /*
+    Team distribution table.
+  */
+
+  let table = `
+
+    <div class="team-table">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Team</th>
+
+            ${heats.map(
+              h=>
+                `<th>H${h.number}</th>`
+            ).join("")}
+
+            <th>Status</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+  `;
+
+
+  analysis.forEach(
+    team=>{
+
+      table += `
+
+        <tr>
+
+          <td>
+            <b>
+              ${escapeHTML(team.team)}
+            </b>
+          </td>
+
+          ${team.distribution.map(
+            count=>
+              `<td>
+                ${count}
+              </td>`
+          ).join("")}
+
+          <td>
+
+            ${
+              team.conflict
+              ?
+              `<span class="team-error">
+                 CONFLICT
+               </span>`
+              :
+              (
+                distributionIsBalanced(
+                  team.distribution
+                )
+                ?
+                `<span class="team-good">
+                   BALANCED
+                 </span>`
+                :
+                `<span class="team-warning">
+                   IMBALANCED
+                 </span>`
+              )
+            }
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+  );
+
+
+  table += `
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+
+  summary.innerHTML +=
+    "<div style='margin-top:12px'>" +
+    table +
+    "</div>";
+
+
+  /*
+    Suggestions are automatically generated.
+  */
+
+  const suggestions =
+    getSwapSuggestions();
+
+
+  if(!suggestions.length){
+
+    suggestionsBox.innerHTML =
+      `
+        <div class="status ok">
+          ✓ 暫時沒有需要建議的交換。
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  suggestionsBox.innerHTML =
+    `
+
+      <h3>
+        Suggested Adjustments
+      </h3>
+
+      <div style="
+        color:#9ca9bc;
+        font-size:12px;
+        margin-bottom:12px;
+      ">
+        以下只係建議，不會自動修改 Startlist。
+        由 Commissaire 決定是否 Apply。
+      </div>
+
+      ${
+        suggestions
+          .map(
+            (s,index)=>
+              renderSuggestion(
+                s,
+                index
+              )
+          )
+          .join("")
+      }
+
+    `;
+
+}
+
+
+/* =========================================================
+   DISTRIBUTION BALANCE
+========================================================= */
+
+function distributionIsBalanced(
+  values
+){
+
+  if(!values.length){
+    return true;
+  }
+
+  return (
+    Math.max(...values)
+    -
+    Math.min(...values)
+  ) <= 1;
+
+}
+
+
+/* =========================================================
+   SUGGESTION CARD
+========================================================= */
+
+function renderSuggestion(
+  suggestion,
+  index
+){
+
+  const reason =
+    suggestion.type === "hard"
+
+    ?
+
+    `
+      <b>Hard conflict improvement</b><br>
+      可消除
+      ${suggestion.conflictImprovement}
+      個同隊同組問題。
+    `
+
+    :
+
+    `
+      <b>Distribution improvement</b><br>
+      可改善隊伍分布。
+    `;
+
+
+  return `
+
+    <div class="
+      suggestion
+      ${suggestion.type}
+    ">
+
+      <div class="suggestion-title">
+
+        Suggestion ${index+1}
+
+        ${
+          suggestion.type === "hard"
+          ?
+          `<span class="badge conflict">
+             PRIORITY
+           </span>`
+          :
+          `<span class="badge">
+             OPTIONAL
+           </span>`
+        }
+
+      </div>
+
+
+      <div style="
+        display:grid;
+        grid-template-columns:1fr auto 1fr;
+        gap:10px;
+        align-items:center;
+      ">
+
+        <div>
+
+          <b>
+            HEAT ${suggestion.heatA}
+          </b>
+
+          <br>
+
+          ${escapeHTML(
+            suggestion.a.name
+          )}
+
+          <br>
+
+          <span style="
+            color:#9ca9bc;
+            font-size:11px;
+          ">
+
+            ${escapeHTML(
+              suggestion.a.team
+            )}
+
+            ${
+              suggestion.a.rank === null
+              ? " · NR"
+              : " · #" +
+                suggestion.a.rank
+            }
+
+          </span>
+
+        </div>
+
+
+        <div style="
+          font-size:20px;
+          color:#6f9fff;
+        ">
+          ↔
+        </div>
+
+
+        <div>
+
+          <b>
+            HEAT ${suggestion.heatB}
+          </b>
+
+          <br>
+
+          ${escapeHTML(
+            suggestion.b.name
+          )}
+
+          <br>
+
+          <span style="
+            color:#9ca9bc;
+            font-size:11px;
+          ">
+
+            ${escapeHTML(
+              suggestion.b.team
+            )}
+
+            ${
+              suggestion.b.rank === null
+              ? " · NR"
+              : " · #" +
+                suggestion.b.rank
+            }
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="suggestion-detail"
+           style="margin-top:10px">
+
+        ${reason}
+
+        <br>
+
+        Ranking displacement:
+        <b>
+          ${suggestion.rankCost}
+        </b>
+
+      </div>
+
+
+      <div class="btnrow">
+
+        <button
+          class="secondary"
+          onclick="
+            applySuggestedSwap(
+              '${suggestion.a.id}',
+              '${suggestion.b.id}'
+            )
+          ">
+
+          Apply Swap
+
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   APPLY SUGGESTION
+========================================================= */
+
+function applySuggestedSwap(
+  idA,
+  idB
+){
+
+  if(locked){
+
+    alert(
+      "Startlist 已 Lock。"
+    );
+
+    return;
+
+  }
+
+
+  swapById(
+    idA,
+    idB
+  );
+
+
+  renderAll();
+
+}
+
+
+/* =========================================================
+   SWAP ENGINE
+========================================================= */
+
+function swapById(
+  idA,
+  idB
+){
+
+  let locationA = null;
+  let locationB = null;
+
+
+  heats.forEach(
+    (heat,h)=>{
+
+      heat.riders.forEach(
+        (r,index)=>{
+
+          if(r.id === idA){
+
+            locationA = {
+              heat:h,
+              index
+            };
+
+          }
+
+
+          if(r.id === idB){
+
+            locationB = {
+              heat:h,
+              index
+            };
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  if(
+    !locationA ||
+    !locationB
+  ){
+
+    return false;
+
+  }
+
+
+  const temp =
+    heats[
+      locationA.heat
+    ].riders[
+      locationA.index
+    ];
+
+
+  heats[
+    locationA.heat
+  ].riders[
+    locationA.index
+  ] =
+    heats[
+      locationB.heat
+    ].riders[
+      locationB.index
+    ];
+
+
+  heats[
+    locationB.heat
+  ].riders[
+    locationB.index
+  ] =
+    temp;
+
+
+  return true;
+
+}
+
+
+/* =========================================================
+   MANUAL SWAP
+========================================================= */
+
+function manualSwap(){
+
+  if(locked){
+
+    alert(
+      "Startlist 已 Lock。"
+    );
+
+    return;
+
+  }
+
+
+  const idA =
+    document.getElementById(
+      "swapA"
+    ).value;
+
+  const idB =
+    document.getElementById(
+      "swapB"
+    ).value;
+
+
+  if(
+    !idA ||
+    !idB ||
+    idA === idB
+  ){
+
+    alert(
+      "請選擇兩名不同車手。"
+    );
+
+    return;
+
+  }
+
+
+  swapById(
+    idA,
+    idB
+  );
+
+
+  renderAll();
+
+}
+
+
+/* =========================================================
+   RENDER HEATS
+========================================================= */
+
+function renderHeats(){
+
+  const container =
+    document.getElementById(
+      "heatContainer"
+    );
+
+
+  if(!heats.length){
+
+    container.innerHTML =
+      `
+        <div style="
+          color:#8f9db2;
+        ">
+          尚未產生 Startlist。
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  let html = "";
+
+
+  heats.forEach(
+    heat=>{
+
+      const conflicts =
+        getHeatConflicts(
+          heat
+        );
+
+
+      html += `
+
+        <div class="heat">
+
+          <div class="heat-header">
+
+            <span>
+              HEAT ${heat.number}
+            </span>
+
+            <small>
+
+              ${heat.riders.length}
+              riders
+
+              ${
+                conflicts.length
+                ?
+                `
+                  <span class="badge conflict">
+                    TEAM CONFLICT
+                  </span>
+                `
+                :
+                `
+                  <span class="badge good">
+                    OK
+                  </span>
+                `
+              }
+
+            </small>
+
+          </div>
+
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th class="position">
+                  Pos
+                </th>
+
+                <th>
+                  Rider
+                </th>
+
+                <th>
+                  Team
+                </th>
+
+                <th class="rank-col">
+                  Rank
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+      `;
+
+
+      heat.riders.forEach(
+        (rider,index)=>{
+
+          const isConflict =
+            conflicts.some(
+              conflict =>
+                conflict.riders
+                  .some(
+                    r =>
+                      r.id === rider.id
+                  )
+            );
+
+
+          html += `
+
+            <tr
+              class="
+                ${isConflict
+                  ? "conflict-row"
+                  : ""}
+              ">
+
+              <td class="position">
+                ${index+1}
+              </td>
+
+              <td>
+
+                ${escapeHTML(
+                  rider.name
+                )}
+
+                ${
+                  rider.rank === null
+                  ?
+                  `<span class="badge nr">
+                     NR
+                   </span>`
+                  :
+                  ""
+                }
+
+              </td>
+
+              <td class="team">
+
+                ${escapeHTML(
+                  rider.team
+                )}
+
+              </td>
+
+              <td class="rank-col">
+
+                ${
+                  rider.rank === null
+                  ?
+                  `<span class="nr">
+                     NR
+                   </span>`
+                  :
+                  "#" +
+                  rider.rank
+                }
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      );
+
+
+      html += `
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+  container.innerHTML =
+    html;
+
+
+  updateMainStatus();
+
+}
+
+
+/* =========================================================
+   HEAT CONFLICTS
+========================================================= */
+
+function getHeatConflicts(
+  heat
+){
+
+  const map =
+    new Map();
+
+
+  heat.riders.forEach(
+    rider=>{
+
+      const team =
+        rider.team
+          .trim()
+          .toUpperCase();
+
+
+      if(!map.has(team)){
+
+        map.set(
+          team,
+          []
+        );
+
+      }
+
+
+      map
+        .get(team)
+        .push(rider);
+
+    }
+  );
+
+
+  const result = [];
+
+
+  map.forEach(
+    (group,team)=>{
+
+      if(group.length > 1){
+
+        result.push({
+
+          team,
+
+          riders:group
+
+        });
+
+      }
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   SWAP SELECTORS
+========================================================= */
+
+function renderSwapSelectors(){
+
+  const selectA =
+    document.getElementById(
+      "swapA"
+    );
+
+  const selectB =
+    document.getElementById(
+      "swapB"
+    );
+
+
+  const all =
+    heats.flatMap(
+      h =>
+        h.riders.map(
+          r => ({
+            rider:r,
+            heat:h.number
+          })
+        )
+    );
+
+
+  const options =
+    all.map(
+      x=>`
+
+        <option value="${x.rider.id}">
+
+          H${x.heat}
+          ·
+          ${escapeHTML(
+            x.rider.name
+          )}
+
+          ·
+          ${escapeHTML(
+            x.rider.team
+          )}
+
+          ${
+            x.rider.rank === null
+            ? " · NR"
+            : " · #" +
+              x.rider.rank
+          }
+
+        </option>
+
+      `
+    ).join("");
+
+
+  selectA.innerHTML =
+    options;
+
+  selectB.innerHTML =
+    options;
+
+}
+
+
+/* =========================================================
+   RIDER TABLE
+========================================================= */
+
+function renderRiderTable(){
+
+  const tbody =
+    document.getElementById(
+      "riderTable"
+    );
+
+
+  const sorted =
+    riders
+      .slice()
+      .sort(
+        (a,b)=>{
+
+          if(
+            a.rank === null &&
+            b.rank !== null
+          ){
+            return 1;
+          }
+
+          if(
+            a.rank !== null &&
+            b.rank === null
+          ){
+            return -1;
+          }
+
+          if(
+            a.rank === null &&
+            b.rank === null
+          ){
+
+            return a.name.localeCompare(
+              b.name,
+              "zh-Hant"
+            );
+
+          }
+
+          return a.rank - b.rank;
+
+        }
+      );
+
+
+  tbody.innerHTML =
+    sorted.map(
+      (r,index)=>`
+
+        <tr>
+
+          <td>
+            ${index+1}
+          </td>
+
+          <td>
+            ${escapeHTML(r.name)}
+          </td>
+
+          <td>
+            ${escapeHTML(r.team)}
+          </td>
+
+          <td>
+
+            ${
+              r.rank === null
+              ?
+              `<span class="nr">
+                 NR
+               </span>`
+              :
+              "#" + r.rank
+            }
+
+          </td>
+
+        </tr>
+
+      `
+    ).join("");
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function updateStats(){
+
+  document.getElementById(
+    "riderCount"
+  ).textContent =
+    riders.length;
+
+
+  const heatCount =
+    getHeatCount();
+
+
+  document.getElementById(
+    "heatCount"
+  ).textContent =
+    heatCount || "-";
+
+
+  if(!heatCount){
+
+    document.getElementById(
+      "heatSizes"
+    ).textContent =
+      "-";
+
+    return;
+
+  }
+
+
+  const sizes =
+    calculateHeatSizes(
+      riders.length,
+      heatCount
+    );
+
+
+  document.getElementById(
+    "heatSizes"
+  ).textContent =
+    sizes.join("/");
+
+}
+
+
+/* =========================================================
+   MAIN STATUS
+========================================================= */
+
+function setMainStatus(
+  type,
+  html
+){
+
+  const box =
+    document.getElementById(
+      "mainStatus"
+    );
+
+
+  box.className =
+    "status " + type;
+
+
+  box.innerHTML =
+    html;
+
+}
+
+
+function updateMainStatus(){
+
+  if(!heats.length){
+    return;
+  }
+
+
+  const conflictCount =
+    calculateTeamConflictCount();
+
+
+  const nrCount =
+    riders.filter(
+      r => r.rank === null
+    ).length;
+
+
+  if(conflictCount > 0){
+
+    setMainStatus(
+      "error",
+
+      `
+        <b>⚠ Team Conflict</b><br>
+
+        ${conflictCount}
+        team conflict(s) detected.
+
+        ${
+          nrCount
+          ?
+          `<br>${nrCount} rider(s) have NR.`
+          :
+          ""
+        }
+
+      `
+    );
+
+  }else{
+
+    setMainStatus(
+      "ok",
+
+      `
+        <b>✓ Startlist Ready for Review</b><br>
+
+        ${heats.length} heats ·
+        ${riders.length} riders
+
+        ${
+          nrCount
+          ?
+          ` · ${nrCount} NR`
+          :
+          ""
+        }
+
+      `
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAll(){
+
+  updateStats();
+
+  renderHeats();
+
+  renderSwapSelectors();
+
+  renderTeamAnalysis();
+
+  renderReview();
+
+}
+
+
+/* =========================================================
+   REVIEW
+========================================================= */
+
+function renderReview(){
+
+  const box =
+    document.getElementById(
+      "reviewBox"
+    );
+
+
+  if(!riders.length){
+
+    box.innerHTML =
+      "尚未載入車手。";
+
+    return;
+
+  }
+
+
+  const ranked =
+    riders.filter(
+      r=>r.rank !== null
+    ).length;
+
+
+  const nr =
+    riders.length -
+    ranked;
+
+
+  let html = "";
+
+
+  html += `
+    <div class="review-item">
+      Total Riders:
+      <b>${riders.length}</b>
+    </div>
+
+    <div class="review-item">
+      Ranked Riders:
+      <b>${ranked}</b>
+    </div>
+
+    <div class="review-item">
+      NR Riders:
+      <b>${nr}</b>
+    </div>
+  `;
+
+
+  if(heats.length){
+
+    html += `
+
+      <div class="review-item">
+        Heats:
+        <b>${heats.length}</b>
+      </div>
+
+      <div class="review-item">
+        Heat Sizes:
+        <b>
+          ${
+            heats.map(
+              h =>
+                h.riders.length
+            ).join(" / ")
+          }
+        </b>
+      </div>
+
+      <div class="review-item">
+        Team Conflicts:
+        <b>
+          ${
+            calculateTeamConflictCount()
+          }
+        </b>
+      </div>
+
+      <div class="review-item">
+
+        Status:
+
+        ${
+          locked
+          ?
+          `<span class="locked">
+             🔒 LOCKED
+           </span>`
+          :
+          `<span class="unlocked">
+             🔓 UNLOCKED
+           </span>`
+        }
+
+      </div>
+
+    `;
+
+  }
+
+
+  box.innerHTML =
+    html;
+
+}
+
+
+/* =========================================================
+   LOCK
+========================================================= */
+
+function toggleLock(){
+
+  if(!heats.length){
+
+    alert(
+      "請先 Generate Startlist。"
+    );
+
+    return;
+
+  }
+
+
+  if(!locked){
+
+    const conflicts =
+      calculateTeamConflictCount();
+
+
+    if(conflicts > 0){
+
+      const confirmLock =
+        confirm(
+          "目前仍有同隊同組問題。\n\n" +
+          "確定仍然 Lock Startlist？"
+        );
+
+
+      if(!confirmLock){
+        return;
+      }
+
+    }
+
+
+    locked = true;
+
+  }else{
+
+    locked = false;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "lockButton"
+    );
+
+
+  if(locked){
+
+    button.textContent =
+      "🔒 Unlock Startlist";
+
+    button.className =
+      "danger";
+
+  }else{
+
+    button.textContent =
+      "🔓 Lock Startlist";
+
+    button.className =
+      "success";
+
+  }
+
+
+  renderReview();
+
+}
+
+
+/* =========================================================
+   FORMAT CHANGE
+========================================================= */
+
+document
+  .getElementById(
+    "formatProfile"
+  )
+  .addEventListener(
+    "change",
+    ()=>{
+
+      updateStats();
+
+      if(
+        riders.length &&
+        !locked
+      ){
+
+        generateStartlist();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   DEMO
+========================================================= */
+
+function loadDemo(
+  count
+){
+
+  if(locked){
+
+    alert(
+      "請先 Unlock。"
+    );
+
+    return;
+
+  }
+
+
+  const teams = [
+
+    "HKG",
+    "CHN",
+    "JPN",
+    "KOR",
+    "AUS",
+    "GBR",
+    "FRA",
+    "GER",
+    "NED",
+    "NZL",
+    "MAS",
+    "SGP"
+
+  ];
+
+
+  const rows = [];
+
+
+  for(
+    let i=1;
+    i<=count;
+    i++
+  ){
+
+    /*
+      Two riders from some teams
+      deliberately included for testing.
+    */
+
+    const team =
+      teams[
+        Math.floor(
+          (i-1)/2
+        ) % teams.length
+      ];
+
+
+    /*
+      Last 10% become NR.
+    */
+
+    const rank =
+      i >
+      Math.floor(
+        count * 0.90
+      )
+      ? ""
+      : i;
+
+
+    rows.push(
+
+      `Rider ${String(i).padStart(2,"0")},` +
+      `${team},` +
+      `${rank}`
+
+    );
+
+  }
+
+
+  document.getElementById(
+    "inputData"
+  ).value =
+    rows.join("\n");
+
+
+  loadRiders();
+
+  generateStartlist();
+
+}
+
+
+/* =========================================================
+   EXPORT
+========================================================= */
+
+function exportJSON(){
+
+  const data = {
+
+    application:
+      "Keirin Startlist Generator",
+
+    version:
+      "3.0",
+
+    exportedAt:
+      new Date().toISOString(),
+
+    format:
+      document.getElementById(
+        "formatProfile"
+      ).value,
+
+    riders,
+
+    heats,
+
+    locked
+
+  };
+
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+
+  a.href = url;
+
+  a.download =
+    "keirin-startlist.json";
+
+  a.click();
+
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
+
+/* =========================================================
+   IMPORT
+========================================================= */
+
+function importJSON(
+  event
+){
+
+  const file =
+    event.target.files[0];
+
+
+  if(!file){
+    return;
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(){
+
+      try{
+
+        const data =
+          JSON.parse(
+            reader.result
+          );
+
+
+        riders =
+          data.riders || [];
+
+
+        heats =
+          data.heats || [];
+
+
+        locked =
+          !!data.locked;
+
+
+        if(
+          data.format &&
+          FORMAT_PROFILES[
+            data.format
+          ]
+        ){
+
+          document.getElementById(
+            "formatProfile"
+          ).value =
+            data.format;
+
+        }
+
+
+        document.getElementById(
+          "inputData"
+        ).value =
+
+          riders
+            .map(
+              r =>
+                `${r.name},${r.team},${
+                  r.rank ?? ""
+                }`
+            )
+            .join("\n");
+
+
+        renderRiderTable();
+
+        renderAll();
+
+
+        const button =
+          document.getElementById(
+            "lockButton"
+          );
+
+
+        button.textContent =
+          locked
+          ? "🔒 Unlock Startlist"
+          : "🔓 Lock Startlist";
+
+
+        button.className =
+          locked
+          ? "danger"
+          : "success";
+
+
+        alert(
+          "JSON imported."
+        );
+
+
+      }catch(error){
+
+        alert(
+          "JSON Import Error:\n" +
+          error.message
+        );
+
+      }
+
+    };
+
+
+  reader.readAsText(
+    file
+  );
+
+}
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+updateStats();
+
+renderReview();
+
+</script>
+
+</body>
+</html>
